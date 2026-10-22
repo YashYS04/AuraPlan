@@ -1,6 +1,6 @@
 /**
  * AuraPlan Client Application Controller
- * Featuring Apple Liquid Glass theme dynamics, persistent blueprint vault history,
+ * Featuring adaptive fluid theme dynamics, persistent blueprint vault history,
  * and seamless interactive plan management.
  */
 
@@ -62,7 +62,7 @@ const THEME_NAMES = {
 };
 
 /**
- * Updates dynamic Apple Liquid Glass event theme on document body.
+ * Updates dynamic event theme on document body.
  * @param {string} type
  */
 function setEventTheme(type) {
