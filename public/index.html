@@ -15,20 +15,33 @@
     <div class="container hero-container">
       <nav class="nav-bar" aria-label="Main Navigation">
         <a href="/" class="brand-logo" aria-label="AuraPlan Home">
-          <svg class="logo-icon" viewBox="0 0 32 32" width="28" height="28" fill="none" aria-hidden="true">
-            <rect width="32" height="32" rx="8" fill="currentColor"/>
-            <path d="M9 11h14M9 16h14M9 21h8" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
-            <circle cx="22" cy="21" r="3" fill="#fbbf24"/>
+          <svg class="logo-icon" viewBox="0 0 64 64" width="32" height="32" fill="none" aria-hidden="true">
+            <defs>
+              <linearGradient id="lndLogoBg" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#4f46e5"/>
+                <stop offset="45%" stop-color="#7c3aed"/>
+                <stop offset="80%" stop-color="#db2777"/>
+                <stop offset="100%" stop-color="#f59e0b"/>
+              </linearGradient>
+              <linearGradient id="lndGlass" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#ffffff" stop-opacity="0.45"/>
+                <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <rect x="4" y="4" width="56" height="56" rx="16" fill="url(#lndLogoBg)"/>
+            <rect x="5" y="5" width="54" height="28" rx="15" fill="url(#lndGlass)"/>
+            <path d="M20 25h24M20 34h24M20 43h14" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+            <circle cx="44" cy="38" r="3" fill="#fef08a"/>
           </svg>
           <span>AuraPlan</span>
         </a>
         <div class="nav-links">
-          <a href="/plan" class="btn btn-primary">Open Planner</a>
+          <a href="/plan" class="btn btn-primary">Open Studio</a>
         </div>
       </nav>
 
       <div class="hero-content">
-        <span class="hero-pill">✨ GenAI-Powered Event Architecture</span>
+        <span class="hero-pill">✨ Apple Liquid Glass Architecture</span>
         <h1 class="hero-title">Flawless celebrations designed with creative AI & mathematical precision.</h1>
         <p class="hero-subtitle">
           Whether you are planning a dream wedding, an unforgettable milestone birthday, or a vibrant community festival, AuraPlan generates balanced budgets, realistic timelines, and vendor RFPs in seconds.
