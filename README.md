@@ -1,9 +1,9 @@
 # AuraPlan — Autonomous AI Celebration & Event Architect
 
-[![CI](https://github.com/Aryamann002/AuraPlan/actions/workflows/ci.yml/badge.svg)](https://github.com/Aryamann002/AuraPlan/actions/workflows/ci.yml)
+[![CI](https://github.com/YashYS04/AuraPlan/actions/workflows/ci.yml/badge.svg)](https://github.com/YashYS04/AuraPlan/actions/workflows/ci.yml)
 [![Node.js](https://img.shields.io/badge/Node.js-24.x-brightgreen.svg)](https://nodejs.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Coverage](https://img.shields.io/badge/Coverage-100%25-success.svg)](https://github.com/Aryamann002/AuraPlan)
+[![Coverage](https://img.shields.io/badge/Coverage-100%25-success.svg)](https://github.com/YashYS04/AuraPlan)
 
 A production-grade, autonomous GenAI planning assistant engineered for **Weddings**, **Birthdays**, and **Community Gatherings**. AuraPlan couples creative generative intelligence with deterministic mathematical and calendar engines to build actionable, hallucination-free event blueprints in seconds.
 
@@ -177,7 +177,7 @@ npm run lint             # Verify ESLint code standards
 ### Installation
 ```bash
 # 1. Clone the repository
-git clone https://github.com/Aryamann002/AuraPlan.git
+git clone https://github.com/YashYS04/AuraPlan.git
 cd AuraPlan
 
 # 2. Install dependencies
