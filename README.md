@@ -9,7 +9,7 @@ A production-grade, autonomous GenAI planning assistant engineered for **Wedding
 
 ---
 
-## 🎯 Chosen Vertical & Alignment
+## Chosen Vertical & Alignment
 
 AuraPlan addresses the **Celebration & Event Planner** challenge vertical. While generic conversational AI frequently fabricates budgets that fail to sum correctly and suggests generic timelines, AuraPlan is specifically built around the nuanced logistical personas of three celebration categories:
 
@@ -21,48 +21,48 @@ AuraPlan addresses the **Celebration & Event Planner** challenge vertical. While
 
 ---
 
-## 💡 Architecture & How It Works
+## Architecture & How It Works
+
+```
+Browser Client (public/: static HTML, CSS and ES modules from Vercel CDN)
+  │
+  │  POST /api/plan (JSON, max 32 KB)
+  ▼
+api/plan.js — Vercel Serverless Function (Node 24)
+  │
+  ├── 1. Sliding Window Rate Limiter (10 req/min per client IP)
+  ├── 2. Input Sanitization & Payload Cap (strip control chars, prototype pollution guard)
+  ├── 3. Strict Zod Input Validation (event date window, guest/budget bounds)
+  ├── 4. In-Memory LRU Cache Check (SHA-256 hash lookup)
+  │     ├── Cache Hit  ─► Skip LLM call, proceed to enrichment
+  │     └── Cache Miss ─► Continue to Gemini
+  ├── 5. XML-Tagged Prompt Construction (<event_details>, <previous_plan>)
+  ├── 6. Gemini 3.5 Flash Lite via @google/genai (Structured JSON Schema)
+  ├── 7. Strict Zod Output Validation (GeneratedPlan schema verification)
+  └── 8. Deterministic Mathematical Enrichment:
+        ├── Hamilton Largest-Remainder Method (exact budget sum to 100%)
+        └── Milestone Calendar Scheduling (converts weeks to dates, flags overdue tasks)
+  │
+  ▼
+Enriched Plan JSON Response ──► Rendered via safe DOM APIs (zero innerHTML)
+```
 
 ```mermaid
-flowchart TD
-    Client["Browser Client (Vanilla HTML5 / CSS3 / ES Modules)"] -->|"POST /api/plan (JSON, Max 32KB)"| Edge["Vercel Serverless Function (Node 24)"]
-    
-    subgraph Security_Gate ["Security & Validation Layer"]
-        Edge --> RateLimit{"Sliding Window Rate Limiter<br/>(10 req/min/IP)"}
-        RateLimit -->|Pass| CSRF{"CSRF & Origin Check"}
-        CSRF -->|Pass| BodyCheck{"Payload Cap (32 KB)<br/>+ Prototype Pollution Defense"}
-        BodyCheck -->|Pass| ZodIn{"Strict Zod Input Validation<br/>(Date windows, Bounds, Sanitization)"}
-    end
-
-    subgraph Cache_Layer ["In-Memory LRU Cache"]
-        ZodIn --> CacheCheck{"SHA-256 Cache Lookup"}
-        CacheCheck -->|Cache Hit| EnforceMath["Deterministic Enrichment Engine"]
-    end
-
-    subgraph LLM_Boundary ["Generative Intelligence Boundary"]
-        CacheCheck -->|Cache Miss| PromptEngine["Prompt Builder<br/>(Strict XML Data Tagging)"]
-        PromptEngine --> GeminiSDK["@google/genai (Gemini 2.5 Flash)<br/>Structured Output Schema (JSON)"]
-        GeminiSDK --> ZodOut{"Strict Zod Model Validation<br/>(GeneratedPlan Schema)"}
-        ZodOut --> CacheWrite["Store in LRU Cache"]
-    end
-
-    CacheWrite --> EnforceMath
-    
-    subgraph Deterministic_Engine ["Deterministic Code (Arithmetic & Calendar)"]
-        EnforceMath --> Hamilton["Hamilton Largest-Remainder Method<br/>(Guaranteed Exact Budget Sum)"]
-        EnforceMath --> TimelineEngine["Milestone Calendar Mapper<br/>(Pulls Overdue Tasks to Today)"]
-    end
-
-    TimelineEngine --> Response["Enriched Plan Response (JSON)"]
-    Response --> Client
-    
-    subgraph Client_Features ["Client Workflows & Actionability"]
-        Client --> LocalStorage["Persistent LocalStorage (Auto-Save)"]
-        Client --> IcsExport["1-Click .ics Calendar Sync (RFC 5545)"]
-        Client --> CsvExport["Spreadsheet Budget Export (CSV)"]
-        Client --> RfpCopy["Vendor RFP Email Draft Generator"]
-        Client --> Refine["Stateful Plan Revision (Feedback Loop)"]
-    end
+graph TD
+    Client["Browser Client (HTML5 / CSS3 / ES Modules)"] -->|"POST /api/plan (JSON, Max 32KB)"| Edge["Vercel Serverless Function (Node 24)"]
+    Edge --> Limiter["Sliding Window Rate Limiter (10 req/min per IP)"]
+    Limiter --> ZodIn["Strict Zod Input Validation (Date window, Bounds, Sanitization)"]
+    ZodIn --> Cache{"In-Memory LRU Cache (SHA-256)"}
+    Cache -->|"Cache Hit"| Enrich["Deterministic Enrichment Engine"]
+    Cache -->|"Cache Miss"| Prompt["Prompt Builder (XML Tag Isolation)"]
+    Prompt --> Gemini["Google Gemini 3.5 Flash Lite (Structured Output)"]
+    Gemini --> ZodOut["Strict Zod Output Validation (GeneratedPlan)"]
+    ZodOut --> Enrich
+    Enrich --> Math["Hamilton Largest-Remainder Method (Exact Budget Sum)"]
+    Enrich --> Cal["Milestone Calendar Mapper (Overdue Task Flagging)"]
+    Math --> Resp["Enriched Plan JSON Response"]
+    Cal --> Resp
+    Resp --> Client
 ```
 
 ### The Core Architectural Principle
@@ -76,22 +76,22 @@ LLMs are notoriously unreliable at arithmetic and date math. In AuraPlan:
 
 ---
 
-## 🚀 Key Features & Real-World Usability
+## Key Features & Real-World Usability
 
-* 💰 **Exact Budget Breakdown**: Complete financial visibility with tailored value-maximizing tips for every line item and a mandatory 5–10% Contingency Reserve.
-* 📅 **Milestone Timeline**: Chronological execution roadmap grouped by calendar month with automated overdue task detection.
-* 📆 **1-Click Calendar Sync (`.ics`)**: Direct export to RFC 5545 iCalendar files to synchronize all event milestones instantly with **Google Calendar**, **Apple Calendar**, or **Outlook**.
-* 📊 **Spreadsheet Export (`.csv`)**: Formatted budget sheet export for offline bookkeeping and sharing with family or committees.
-* ✉️ **Vendor RFP & Interview Generator**: Pre-formatted inquiry emails with customized questions and event parameters, ready to copy and send to prospective vendors.
-* 🛡️ **Risk & Contingency Matrix**: Automated identification of vertical-specific logistical hazards (inclement weather, permit lead times, diet allergies) paired with actionable preventative strategies.
-* 🔄 **Stateful Conversational Refinement**: Modify existing plans seamlessly (*"Reduce catering budget by 10%"*, *"Shift timeline earlier"*) without resetting form parameters.
-* 💾 **Auto-Save & Resume**: Preserves blueprints and vendor booked states in browser `localStorage` without requiring user accounts or logins.
-* 🖨️ **Executive Print / PDF Binder**: Dedicated print stylesheet formatting the plan into a clean, professional event binder.
-* 🌐 **Multilingual & Multi-Currency**: Full native support for 7 languages (English, Hindi, Tamil, Bengali, Spanish, French, German) and 7 global currencies (USD, INR, EUR, GBP, AED, CAD, AUD).
+* **Exact Budget Breakdown**: Complete financial visibility with tailored value-maximizing tips for every line item and a mandatory 5–10% Contingency Reserve.
+* **Milestone Timeline**: Chronological execution roadmap grouped by calendar month with automated overdue task detection.
+* **1-Click Calendar Sync (.ics)**: Direct export to RFC 5545 iCalendar files to synchronize all event milestones instantly with **Google Calendar**, **Apple Calendar**, or **Outlook**.
+* **Spreadsheet Export (.csv)**: Formatted budget sheet export for offline bookkeeping and sharing with family or committees.
+* **Vendor RFP & Interview Generator**: Pre-formatted inquiry emails with customized questions and event parameters, ready to copy and send to prospective vendors.
+* **Risk & Contingency Matrix**: Automated identification of vertical-specific logistical hazards (inclement weather, permit lead times, diet allergies) paired with actionable preventative strategies.
+* **Stateful Conversational Refinement**: Modify existing plans seamlessly (*"Reduce catering budget by 10%"*, *"Shift timeline earlier"*) without resetting form parameters.
+* **Persistent Blueprint Vault**: Automatically archives all generated blueprints to browser `localStorage` with a slide-over drawer to recall previous plans instantly.
+* **Executive Print / PDF Binder**: Dedicated print stylesheet formatting the plan into a clean, professional event binder.
+* **Multilingual & Multi-Currency**: Full native support for 7 languages (English, Hindi, Tamil, Bengali, Spanish, French, German) and 7 global currencies (USD, INR, EUR, GBP, AED, CAD, AUD).
 
 ---
 
-## 🔒 Security & Safe Engineering
+## Security & Safe Engineering
 
 AuraPlan is built with defense-in-depth principles across both untrusted boundaries:
 
@@ -107,7 +107,7 @@ AuraPlan is built with defense-in-depth principles across both untrusted boundar
 
 ---
 
-## ♿ Accessibility (WCAG 2.2 AA / AAA Compliance)
+## Accessibility (WCAG 2.2 AA / AAA Compliance)
 
 * **Keyboard Navigation**: Full tab sequence with visible focus rings (`:focus-visible`), skip-link to main content, and keyboard-navigable interactive controls.
 * **Semantic Landmarks**: Strict HTML5 structure using `<header>`, `<nav>`, `<main>`, `<section>`, `<article>`, `<time>`, and `<ol>`. Exactly one `<h1>` per view.
@@ -117,7 +117,7 @@ AuraPlan is built with defense-in-depth principles across both untrusted boundar
 
 ---
 
-## 🧪 Testing & Verification
+## Testing & Verification
 
 AuraPlan achieves **100% test coverage** across all modules using Node.js's native test runner (`node --test`), requiring zero external test framework bloat.
 
@@ -151,24 +151,24 @@ npm run lint             # Verify ESLint code standards
 
 ---
 
-## ⚡ Performance & Efficiency
+## Performance & Efficiency
 
-* **Total Repository Size**: **~180 KB** (Well under the strict **10 MB limit**).
+* **Total Repository Size**: **~216 KB** (Well under the strict **10 MB limit**).
 * **Zero Frontend Build Overhead**: Pure native ES modules and vanilla CSS. Zero npm build delay, zero webpack/vite overhead, and instant page loads.
 * **Serverless Execution**: Sub-second deterministic calculations, and SHA-256 LRU caching providing **< 10ms** response times on repeat queries.
 * **Automated Transient Retry**: Exactly one retry with exponential backoff on transient Google AI 503 errors within a 45-second deadline.
 
 ---
 
-## 📋 Assumptions Made
+## Assumptions Made
 
 1. **Vendor Pricing & Availability**: Budget allocations and timeline milestones are realistic recommendations based on industry standards; users are reminded to confirm real-time prices with local vendors.
 2. **Runtime Environment**: Designed for Node.js 20+ runtime deployed to Vercel or any standard Node serverless platform.
-3. **Model Selection**: Defaults to `gemini-2.5-flash` for high throughput, reliable structured JSON schemas, and responsive generation latency (~7-12s).
+3. **Model Selection**: Defaults to `gemini-3.5-flash-lite` for high throughput, reliable structured JSON schemas, and responsive generation latency (~7-12s).
 
 ---
 
-## 🛠️ Local Setup & Quickstart
+## Local Setup & Quickstart
 
 ### Prerequisites
 * Node.js 20.x or 24.x
@@ -191,12 +191,12 @@ cp .env.example .env
 npm test
 npm run lint
 
-# 5. Start local development server (via Vercel CLI)
-npx vercel dev
+# 5. Start local development server
+npm start
 # Open http://localhost:3000 in your browser
 ```
 
 ---
 
-## ⚖️ License
+## License
 MIT License. Created for the PromptWars AI Engineering Challenge.

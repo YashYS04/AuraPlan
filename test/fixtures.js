@@ -90,9 +90,12 @@ export const MOCK_GENERATED_PLAN = {
   },
 };
 
+// Computes a reliable future date (6 months ahead) so test assertions never expire
+const futureEventDate = new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+
 export const MOCK_REQUEST_DATA = {
   eventType: 'wedding',
-  eventDate: '2026-10-24',
+  eventDate: futureEventDate,
   location: 'Seattle, WA',
   guestCount: 120,
   budget: 30000,
