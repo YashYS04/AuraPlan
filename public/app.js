@@ -104,6 +104,32 @@ function clearError() {
 }
 
 /**
+ * Clears field-level error messages and aria-invalid attributes.
+ */
+function clearFieldErrors() {
+  for (const node of document.querySelectorAll('.field-error')) {
+    node.textContent = '';
+  }
+  for (const field of document.querySelectorAll('[aria-invalid]')) {
+    field.removeAttribute('aria-invalid');
+  }
+}
+
+/**
+ * Binds field-level errors to accessible slots and shifts focus to the first invalid field.
+ * @param {Record<string, string>} fieldErrors
+ */
+function showFieldErrors(fieldErrors) {
+  for (const [name, message] of Object.entries(fieldErrors)) {
+    const slot = document.getElementById(`${name}-error`) ?? document.getElementById('form-error');
+    if (slot) slot.textContent = message;
+    const input = document.querySelector(`[name="${CSS.escape(name)}"]`);
+    input?.setAttribute('aria-invalid', 'true');
+  }
+  document.querySelector('[aria-invalid="true"]')?.focus();
+}
+
+/**
  * Loads vault history from localStorage.
  */
 function loadHistory() {
@@ -321,6 +347,7 @@ function clearAndReset() {
 
   if (planOutput) planOutput.hidden = true;
   clearError();
+  clearFieldErrors();
 
   // Reset default event theme
   setEventTheme('wedding');
@@ -392,6 +419,7 @@ function displayPlan() {
  */
 async function requestPlan(payload) {
   clearError();
+  clearFieldErrors();
   submitBtn.disabled = true;
   if (refineBtn) refineBtn.disabled = true;
   loadingIndicator.hidden = false;
@@ -405,9 +433,11 @@ async function requestPlan(payload) {
       body: JSON.stringify(payload),
     });
 
-    const data = await res.json();
+    const data = await res.json().catch(() => null);
     if (!res.ok) {
-      throw new Error(data?.error?.message || `Planning request failed with status ${res.status}`);
+      const err = new Error(data?.error?.message || `Planning request failed with status ${res.status}`);
+      err.fieldErrors = data?.error?.fieldErrors;
+      throw err;
     }
 
     currentPlan = data.plan;
@@ -437,6 +467,9 @@ async function requestPlan(payload) {
     announceStatus('Event blueprint successfully generated and saved to vault.');
   } catch (err) {
     showError(err.message || 'Unable to generate plan. Please try again.');
+    if (err.fieldErrors) {
+      showFieldErrors(err.fieldErrors);
+    }
   } finally {
     submitBtn.disabled = false;
     if (refineBtn) refineBtn.disabled = false;
@@ -552,7 +585,7 @@ function init() {
   // Calendar sync download (.ics)
   downloadIcsBtn?.addEventListener('click', async () => {
     if (!currentPlan?.timeline) return;
-    const { generateIcsCalendar } = await import('./planner.js');
+    const { generateIcsCalendar } = await import('./export.js');
     const icsContent = generateIcsCalendar(
       currentPlan.timeline,
       `${currentMeta.eventType.toUpperCase()} - ${currentMeta.location}`,
@@ -573,7 +606,7 @@ function init() {
   // Budget spreadsheet download (.csv)
   downloadCsvBtn?.addEventListener('click', async () => {
     if (!currentPlan?.budget) return;
-    const { generateCsvBudget } = await import('./planner.js');
+    const { generateCsvBudget } = await import('./export.js');
     const csvContent = generateCsvBudget(currentPlan.budget, currentMeta.budget, currentMeta.currency);
 
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8' });

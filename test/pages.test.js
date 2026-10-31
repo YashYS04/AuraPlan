@@ -1,39 +1,53 @@
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { describe, it } from 'node:test';
 
-const PAGES = [
-  { name: 'index.html', path: 'public/index.html' },
-  { name: 'plan.html', path: 'public/plan.html' },
-];
+const PUBLIC = new URL('../public/', import.meta.url);
+const pages = readdirSync(PUBLIC).filter((file) => file.endsWith('.html'));
 
-describe('Static HTML Pages Audit', () => {
-  for (const page of PAGES) {
-    describe(page.name, () => {
-      const content = readFileSync(page.path, 'utf8');
+/** Mirrors cleanUrls in vercel.json: / serves index.html and /plan serves plan.html. */
+function fileFor(pathname) {
+  const path = pathname.slice(1) || 'index';
+  return new URL(path.includes('.') ? path : `${path}.html`, PUBLIC);
+}
 
-      it('declares a valid document language', () => {
-        assert.match(content, /<html\s+lang="[a-z]{2}"/);
-      });
+for (const page of pages) {
+  describe(page, () => {
+    const html = readFileSync(new URL(page, PUBLIC), 'utf8');
+    const ids = new Set([...html.matchAll(/\sid="([^"]+)"/g)].map((match) => match[1]));
+    const urls = [...html.matchAll(/\s(?:href|src)="([^"]+)"/g)].map((match) => match[1]);
 
-      it('has exactly one h1 tag for accessibility', () => {
-        const matches = content.match(/<h1[\s>]/g) || [];
-        assert.equal(matches.length, 1, `Expected exactly 1 <h1> in ${page.name}, found ${matches.length}`);
-      });
-
-      it('contains an accessible skip link', () => {
-        assert.match(content, /class="skip-link"/);
-      });
-
-      it('loads no third-party CDNs or inline style attributes to honor strict CSP', () => {
-        assert.doesNotMatch(content, /https?:\/\/(?!localhost|auraplan)/i, 'External CDN found in HTML');
-        assert.doesNotMatch(content, /<style[\s>]/i, 'Inline <style> tag found');
-      });
-
-      it('uses module scripts with src or no scripts', () => {
-        const inlineScripts = content.match(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/gi) || [];
-        assert.equal(inlineScripts.length, 0, 'Inline <script> found');
-      });
+    it('links only to pages, files and anchors that exist', () => {
+      for (const url of urls.filter((value) => !/^[a-z]+:/i.test(value))) {
+        if (url.startsWith('#')) {
+          assert.ok(ids.has(url.slice(1)), `no element with id for ${url} in ${page}`);
+          continue;
+        }
+        const { pathname } = new URL(url, 'https://auraplan.local/');
+        assert.ok(existsSync(fileFor(pathname)), `no file serves ${url}`);
+      }
     });
-  }
-});
+
+    // The CSP in vercel.json allows only same-origin scripts, styles and images, and nothing inline.
+    it('loads nothing the Content-Security-Policy would block', () => {
+      assert.doesNotMatch(html, /\ssrc="(?:https?:)?\/\//, 'third-party src');
+      assert.doesNotMatch(html, /<link[^>]*\shref="(?:https?:)?\/\//, 'third-party stylesheet or font');
+      assert.doesNotMatch(html, /\sstyle="/, 'inline style attribute');
+      assert.doesNotMatch(html, /<style[\s>]/, 'inline style block');
+      assert.doesNotMatch(html, /<script(?![^>]*\ssrc=)[^>]*>/, 'inline script');
+    });
+
+    it('declares a valid document language', () => {
+      assert.match(html, /<html\s+lang="[a-z]{2}">/i);
+    });
+
+    it('has exactly one h1 tag for accessibility', () => {
+      const matches = html.match(/<h1[\s>]/g) || [];
+      assert.equal(matches.length, 1, `Expected exactly 1 <h1> in ${page}, found ${matches.length}`);
+    });
+
+    it('contains an accessible skip link', () => {
+      assert.match(html, /class="skip-link"/);
+    });
+  });
+}

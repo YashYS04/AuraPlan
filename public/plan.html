@@ -85,11 +85,12 @@
                 <span>Celebration Type</span>
                 <span class="required">*</span>
               </label>
-              <select id="event-type" name="eventType" class="form-select" required>
+              <select id="event-type" name="eventType" class="form-select" required aria-describedby="eventType-error">
                 <option value="wedding" selected>Wedding Celebration (Rose & Gold)</option>
                 <option value="birthday">Birthday Milestone (Neon Purple & Coral)</option>
                 <option value="community">Community Gathering / Festival (Emerald & Cyan)</option>
               </select>
+              <p id="eventType-error" class="field-error" role="status"></p>
             </div>
 
             <div class="form-group">
@@ -97,7 +98,8 @@
                 <span>Target Event Date</span>
                 <span class="required">*</span>
               </label>
-              <input type="date" id="event-date" name="eventDate" class="form-input" required>
+              <input type="date" id="event-date" name="eventDate" class="form-input" required aria-describedby="eventDate-error">
+              <p id="eventDate-error" class="field-error" role="status"></p>
             </div>
 
             <div class="form-group">
@@ -105,7 +107,8 @@
                 <span>City / Destination</span>
                 <span class="required">*</span>
               </label>
-              <input type="text" id="location" name="location" class="form-input" placeholder="e.g., Seattle, WA or Mumbai" required minlength="2" maxlength="100">
+              <input type="text" id="location" name="location" class="form-input" placeholder="e.g., Seattle, WA or Mumbai" required minlength="2" maxlength="100" aria-describedby="location-error">
+              <p id="location-error" class="field-error" role="status"></p>
             </div>
 
             <div class="form-group">
@@ -113,7 +116,8 @@
                 <span>Expected Guest Count</span>
                 <span class="required">*</span>
               </label>
-              <input type="number" id="guest-count" name="guestCount" class="form-input" placeholder="e.g., 150" required min="1" max="10000" value="120">
+              <input type="number" id="guest-count" name="guestCount" class="form-input" placeholder="e.g., 150" required min="1" max="10000" value="120" aria-describedby="guestCount-error">
+              <p id="guestCount-error" class="field-error" role="status"></p>
             </div>
 
             <div class="form-group">
@@ -121,7 +125,8 @@
                 <span>Total Allocated Budget</span>
                 <span class="required">*</span>
               </label>
-              <input type="number" id="budget" name="budget" class="form-input" placeholder="e.g., 30000" required min="1" max="1000000000" value="30000">
+              <input type="number" id="budget" name="budget" class="form-input" placeholder="e.g., 30000" required min="1" max="1000000000" value="30000" aria-describedby="budget-error">
+              <p id="budget-error" class="field-error" role="status"></p>
             </div>
 
             <div class="form-group">
@@ -129,7 +134,7 @@
                 <span>Currency</span>
                 <span class="required">*</span>
               </label>
-              <select id="currency" name="currency" class="form-select" required>
+              <select id="currency" name="currency" class="form-select" required aria-describedby="currency-error">
                 <option value="USD">USD ($)</option>
                 <option value="INR">INR (₹)</option>
                 <option value="EUR">EUR (€)</option>
@@ -138,6 +143,7 @@
                 <option value="CAD">CAD ($)</option>
                 <option value="AUD">AUD ($)</option>
               </select>
+              <p id="currency-error" class="field-error" role="status"></p>
             </div>
 
             <div class="form-group form-group-full">
@@ -145,7 +151,8 @@
                 <span>Aesthetic Vibe & Style Theme</span>
                 <span class="optional">(Optional)</span>
               </label>
-              <input type="text" id="vibe" name="vibe" class="form-input" placeholder="e.g., Romantic botanical garden with fairy lights, Sunset coastal elegance, Retro neon glam" maxlength="250">
+              <input type="text" id="vibe" name="vibe" class="form-input" placeholder="e.g., Romantic botanical garden with fairy lights, Sunset coastal elegance, Retro neon glam" maxlength="250" aria-describedby="vibe-error">
+              <p id="vibe-error" class="field-error" role="status"></p>
             </div>
 
             <div class="form-group form-group-full">
@@ -153,12 +160,13 @@
                 <span>Priorities, Cultural Rituals & Constraints</span>
                 <span class="optional">(Optional)</span>
               </label>
-              <textarea id="priorities" name="priorities" class="form-textarea" rows="3" placeholder="e.g., Vegan and gluten-free catering, prioritize live acoustic music, include Sangeet ceremony, wheelchair accessibility needed..." maxlength="500"></textarea>
+              <textarea id="priorities" name="priorities" class="form-textarea" rows="3" placeholder="e.g., Vegan and gluten-free catering, prioritize live acoustic music, include Sangeet ceremony, wheelchair accessibility needed..." maxlength="500" aria-describedby="priorities-error"></textarea>
+              <p id="priorities-error" class="field-error" role="status"></p>
             </div>
 
             <div class="form-group">
               <label for="language" class="form-label">Output Language</label>
-              <select id="language" name="language" class="form-select">
+              <select id="language" name="language" class="form-select" aria-describedby="language-error">
                 <option value="English">English</option>
                 <option value="Hindi">Hindi (हिंदी)</option>
                 <option value="Tamil">Tamil (தமிழ்)</option>
@@ -167,8 +175,11 @@
                 <option value="French">French (Français)</option>
                 <option value="German">German (Deutsch)</option>
               </select>
+              <p id="language-error" class="field-error" role="status"></p>
             </div>
           </div>
+
+          <p id="form-error" class="field-error" role="status"></p>
 
           <div class="form-actions">
             <button type="submit" id="submit-btn" class="btn btn-primary btn-large">
@@ -215,11 +226,12 @@
           </div>
           <form id="refine-form" class="refine-form">
             <div class="refine-input-group">
-              <input type="text" id="feedback-input" class="form-input" placeholder="Ask for modifications..." required minlength="3" maxlength="400">
+              <input type="text" id="feedback-input" name="feedback" class="form-input" placeholder="Ask for modifications..." required minlength="3" maxlength="400" aria-describedby="feedback-error">
               <button type="submit" id="refine-btn" class="btn btn-primary">
                 Update Blueprint
               </button>
             </div>
+            <p id="feedback-error" class="field-error" role="status"></p>
           </form>
         </section>
       </section>
@@ -242,7 +254,7 @@
         <!-- Rendered dynamically via app.js -->
       </div>
 
-      <div class="history-footer" style="margin-top: 20px; padding-top: 14px; border-top: 1px solid var(--glass-border-subtle); display: flex; justify-content: flex-end;">
+      <div class="history-footer">
         <button type="button" id="clear-all-history-btn" class="btn btn-danger btn-ghost" title="Clear all stored plans">
           🗑️ Clear Vault History
         </button>

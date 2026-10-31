@@ -5,10 +5,9 @@
   "description": "Autonomous GenAI celebration and event planner for weddings, birthdays, and community events featuring deterministic budgets, real-time timelines, vendor RFP generator, and calendar sync.",
   "type": "module",
   "engines": {
-    "node": ">=20.x"
+    "node": "24.x"
   },
   "scripts": {
-    "start": "node dev.js",
     "lint": "eslint .",
     "test": "node --test \"test/**/*.test.js\"",
     "test:coverage": "node --test --experimental-test-coverage \"test/**/*.test.js\""

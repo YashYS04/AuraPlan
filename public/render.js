@@ -53,40 +53,62 @@ export function renderSummary(summary, meta) {
  * @returns {HTMLElement}
  */
 export function renderBudget(budget, total, currency) {
-  const container = el('div', 'budget-section');
+  const container = el('section', 'card budget-section', '', { 'aria-labelledby': 'budget-section-title' });
 
   const header = el('div', 'section-header');
-  header.appendChild(el('h3', 'section-title', 'Budget Allocation'));
+  header.appendChild(el('h3', 'section-title', 'Budget Allocation', { id: 'budget-section-title' }));
   header.appendChild(el('span', 'total-badge', `Total: ${formatMoney(total, currency)}`));
   container.appendChild(header);
 
-  // Visual proportional distribution bar
-  const bar = el('div', 'budget-bar', '', { role: 'progressbar', 'aria-label': 'Budget category distribution' });
-  for (const item of budget) {
-    const segment = el('div', 'budget-bar-segment');
-    segment.style.width = `${item.percent}%`;
-    segment.title = `${item.category}: ${item.percent}% (${formatMoney(item.amount, currency)})`;
-    bar.appendChild(segment);
+  const scrollWrapper = el('div', 'table-scroll', '', {
+    tabindex: '0',
+    role: 'region',
+    'aria-label': 'Budget allocation table',
+  });
+
+  const table = el('table', 'budget-table');
+  const thead = el('thead');
+  const headRow = el('tr');
+  for (const text of ['Category', 'Share', 'Amount', 'Value Tip']) {
+    headRow.appendChild(el('th', '', text, { scope: 'col' }));
   }
-  container.appendChild(bar);
+  thead.appendChild(headRow);
+  table.appendChild(thead);
 
-  // Detail cards
-  const grid = el('div', 'budget-grid');
+  const tbody = el('tbody');
   for (const item of budget) {
-    const card = el('div', 'budget-item-card');
+    const row = el('tr');
 
-    const top = el('div', 'budget-item-top');
-    top.appendChild(el('h4', 'budget-item-name', item.category));
-    top.appendChild(el('span', 'budget-item-amount', formatMoney(item.amount, currency)));
+    const catCell = el('th', 'budget-col-category', item.category, { scope: 'row' });
+    const shareCell = el('td', 'budget-col-share');
+    const meter = el('meter', 'budget-meter', '', {
+      min: '0',
+      max: '100',
+      value: String(item.percent),
+      'aria-hidden': 'true',
+    });
+    const shareText = el('span', 'budget-share-text', `${item.percent}%`);
+    shareCell.append(meter, shareText);
 
-    const share = el('div', 'budget-item-share', `${item.percent}% of budget`);
-    const tip = el('p', 'budget-item-tip', `💡 Tip: ${item.tip}`);
+    const amountCell = el('td', 'budget-col-amount', formatMoney(item.amount, currency));
+    const tipCell = el('td', 'budget-col-tip', item.tip || '');
 
-    card.append(top, share, tip);
-    grid.appendChild(card);
+    row.append(catCell, shareCell, amountCell, tipCell);
+    tbody.appendChild(row);
   }
+  table.appendChild(tbody);
 
-  container.appendChild(grid);
+  const tfoot = el('tfoot');
+  const footRow = el('tr');
+  footRow.appendChild(el('th', '', 'Total', { scope: 'row' }));
+  footRow.appendChild(el('td', '', '100%'));
+  footRow.appendChild(el('td', 'budget-col-amount font-bold', formatMoney(total, currency)));
+  footRow.appendChild(el('td'));
+  tfoot.appendChild(footRow);
+  table.appendChild(tfoot);
+
+  scrollWrapper.appendChild(table);
+  container.appendChild(scrollWrapper);
   return container;
 }
 

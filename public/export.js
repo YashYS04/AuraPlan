@@ -1,11 +1,12 @@
 /**
- * Client-side planner utilities for calendar (.ics) and spreadsheet (.csv) export.
+ * Client-side export generators for milestone synchronization (.ics)
+ * and financial budget spreadsheets (.csv).
  */
 
 /**
- * Generates RFC 5545 iCalendar (.ics) format string.
+ * Generates RFC 5545 compliant iCalendar (.ics) format string.
  * @param {Array<{ task: string, details?: string, dueDate: string }>} timeline
- * @param {string} eventTitle
+ * @param {string} [eventTitle='Event Milestone']
  * @returns {string}
  */
 export function generateIcsCalendar(timeline, eventTitle = 'Event Milestone') {
@@ -14,7 +15,7 @@ export function generateIcsCalendar(timeline, eventTitle = 'Event Milestone') {
 
   const dtStamp = new Date().toISOString().replace(/[-:]/g, '').slice(0, 15) + 'Z';
 
-  const events = timeline
+  const events = (timeline || [])
     .map((item, index) => {
       const cleanDate = item.dueDate.replace(/-/g, '');
       return [
@@ -43,7 +44,7 @@ export function generateIcsCalendar(timeline, eventTitle = 'Event Milestone') {
 }
 
 /**
- * Generates RFC 4180 CSV spreadsheet string.
+ * Generates RFC 4180 compliant CSV spreadsheet string.
  * @param {Array<{ category: string, amount: number, percent: number, tip?: string }>} budget
  * @param {number} total
  * @param {string} currency
@@ -53,7 +54,7 @@ export function generateCsvBudget(budget, total, currency) {
   const escapeCsv = (str) => `"${String(str).replace(/"/g, '""')}"`;
 
   const header = ['Category', `Amount (${currency})`, 'Percentage', 'Value Tip'].join(',');
-  const rows = budget.map((b) =>
+  const rows = (budget || []).map((b) =>
     [
       escapeCsv(b.category),
       b.amount,

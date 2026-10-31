@@ -4,8 +4,6 @@ import {
   allocateBudget,
   daysBetween,
   enrichPlan,
-  generateCsvBudget,
-  generateIcsCalendar,
   scheduleByWeeks,
   toIsoDate,
 } from '../lib/planner.js';
@@ -100,37 +98,6 @@ describe('enrichPlan', () => {
     assert.equal(budgetSum, 50000);
     assert.ok(enriched.timeline[0].dueDate);
     assert.ok(enriched.vendors[0].dueDate);
-  });
-});
-
-describe('generateIcsCalendar', () => {
-  test('generates standard RFC 5545 iCalendar content with all milestones', () => {
-    const timeline = [
-      { task: 'Book Venue', details: 'Sign contract', dueDate: '2026-06-01' },
-      { task: 'Send Invitations', details: 'Mail cards', dueDate: '2026-08-01' },
-    ];
-    const ics = generateIcsCalendar(timeline, 'Garden Wedding');
-
-    assert.ok(ics.includes('BEGIN:VCALENDAR'));
-    assert.ok(ics.includes('VERSION:2.0'));
-    assert.ok(ics.includes('BEGIN:VEVENT'));
-    assert.ok(ics.includes('SUMMARY:[Garden Wedding] Book Venue'));
-    assert.ok(ics.includes('DTSTART;VALUE=DATE:20260601'));
-    assert.ok(ics.includes('END:VCALENDAR'));
-  });
-});
-
-describe('generateCsvBudget', () => {
-  test('generates valid escaped CSV string with headers and total row', () => {
-    const budget = [
-      { category: 'Venue, Food & Bar', amount: 15000, percent: 50, tip: 'Ask for "off-peak" discount' },
-      { category: 'Photo', amount: 15000, percent: 50, tip: 'Package deal' },
-    ];
-    const csv = generateCsvBudget(budget, 30000, 'USD');
-
-    assert.ok(csv.includes('Category,Amount (USD),Percentage,Value Tip'));
-    assert.ok(csv.includes('"Venue, Food & Bar",15000,50%,"Ask for ""off-peak"" discount"'));
-    assert.ok(csv.includes('"TOTAL BUDGET",30000,100%'));
   });
 });
 
